@@ -1,4 +1,6 @@
-const { Schema } = require('mongoose')
+const mongoose = require('mongoose')
+
+const {Schema } = mongoose
 
 const citizenSchema = new Schema({
     //Personal Data
@@ -15,9 +17,10 @@ const citizenSchema = new Schema({
         required: true,
         unique: true
     },
+    citizenID: String,
     gender: {
         type: String,
-        enum: [Male, Female, Transgender]
+        enum: ['Male', 'Female', 'Transgender']
 
     },
     age: {
@@ -40,7 +43,7 @@ const citizenSchema = new Schema({
     city: String,
     LGA: String,
     homeTown: String,
-    Religion: String, 
+    religion: String, 
 
     //Biological Data
     weight: Number,
@@ -48,5 +51,7 @@ const citizenSchema = new Schema({
     bloodGroup: String,
 
     // Parental Data
-    FathersN: String
+    fathersN: String
 })
+
+module.exports = Citizen = mongoose.model('citizens', citizenSchema)
