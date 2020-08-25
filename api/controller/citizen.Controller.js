@@ -1,11 +1,21 @@
-const citizenActions = (Citizens, crypto) => {
-  const citizens = (req, res) => {
-    res.json("all citizen on display");
+const citizenActions = (Citizens, crypto, jwt, jwtScrete) => {
+  const citizens = async (req, res) => {
+    try {
+      const citizens = await Citizens.find({})
+        .select("-__v -createdAt")
+        .sort("desc");
+
+      res.json(citizens);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const citizen = (req, res) => {
     res.json("individual citizen");
   };
+
+
   const register = async (req, res) => {
     const {
       email,
@@ -27,27 +37,46 @@ const citizenActions = (Citizens, crypto) => {
       age,
       gender,
     } = req.body;
-try {
-    const citizenID = crypto.randomBytes(5).toString('hex')
+    try {
+      const Taken = Citizens.find({ email });
+      if (Taken) return res.json(`${email} is taken, choose another email`);
 
-    const newCitizen = new Citizens({
+      const citizenID = crypto.randomBytes(5).toString("hex");
+
+      const newCitizen = new Citizens({
         email,
         fName,
         lName,
         gender,
-        citizenID
-    })
+        citizenID,
+      });
 
-    await newCitizen.save()
+      await newCitizen.save();
 
-    res.json(newCitizen);
-} catch(err) {
-    console.error(err)
-}
+      res.json({ newCitizen, token });
+    } catch (err) {
+      console.error(err);
+    }
   };
-  const login = (req, res) => {
-    res.json("Citizen Login page");
+
+  const login = async (req, res) => {
+    const { email, citizenID } = req.body;
+    if (!(email || citizenID))
+      return res.json("provide a valid email and citizen Id");
+
+    const user = await Citizens.find({ email });
+
+    const payload = {
+      user: user._id
+    };
+
+    const token = await jwt.sign(payload, jwtScrete, { expiresIn: "1h" });
+    // const head = req.headers['x-auth-header'] = await token
+    // const heads = await res.setHeader('x-auth-header', token)
+
+    res.json({ token });
   };
+
   const logout = (req, res) => {
     res.json("You are now logged out");
   };

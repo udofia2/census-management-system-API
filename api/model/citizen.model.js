@@ -51,7 +51,11 @@ const citizenSchema = new Schema({
     bloodGroup: String,
 
     // Parental Data
-    fathersN: String
+    fathersN: String,
+    createdAt:{
+        type: Date,
+        default: Date.now
+    }
 })
 
 module.exports = Citizen = mongoose.model('citizens', citizenSchema)
