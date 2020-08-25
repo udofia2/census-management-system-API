@@ -1,5 +1,7 @@
+const mongoose = require('mongoose')
 const config = require("./default");
-const dbConnection = (mongoose) => {
+
+const dbConnection = () => {
   const db = mongoose.connection;
 
   mongoose.connect(config.db, {
