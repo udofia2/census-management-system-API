@@ -7,7 +7,7 @@ const {
   register,
   admin,
   admins,
-} = require("./../controller/admin.Controller")(validationResult, Admin);
+} = require("./../controller/admin.Controller")(validationResult, Admin, bcrypt);
 const { formReg, formLogin } = require("./../middleware/formValidation")(body);
 const adminRouter = Router();
 

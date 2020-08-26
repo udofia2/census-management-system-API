@@ -18,7 +18,6 @@ const adminActions = (validationResult, Admin, bcrypt) => {
       const { name, email, password } = req.body;
 
       const isUsed = await Admin.findOne({ email });
-      console.log(isUsed)
 
       if (isUsed) return res.json(`${email} is already an Admin`);
 
@@ -28,13 +27,12 @@ const adminActions = (validationResult, Admin, bcrypt) => {
         password,
       });
 
-    //   const salt = await bcrypt.genSalt(10);
-    //   const hash = await bcrypt.hash(password, salt)
-    //   newAdmin.password = hash
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(password, salt);
+      newAdmin.password = hash;
 
       await newAdmin.save();
 
-      console.log(newAdmin.password);
       res.json(newAdmin);
     } catch (err) {
       res.json(err);
