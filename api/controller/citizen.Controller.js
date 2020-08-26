@@ -78,6 +78,7 @@ const citizenActions = (Citizens, crypto, jwt, jwtScrete) => {
   };
 
   const logout = (req, res) => {
+    //   console.log(req.logout())
     res.json("You are now logged out");
   };
 
