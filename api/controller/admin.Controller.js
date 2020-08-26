@@ -1,6 +1,7 @@
-const adminActions = (validationResult, Admin) => {
-  const admins = (req, res) => {
-    res.json("All admins on display");
+const adminActions = (validationResult, Admin, bcrypt) => {
+  const admins = async (req, res) => {
+    const admins = await Admin.find({});
+    res.json(admins);
   };
 
   const login = (req, res) => {
@@ -8,32 +9,36 @@ const adminActions = (validationResult, Admin) => {
   };
 
   const register = async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { name, email, password } = req.body;
+
+      const isUsed = await Admin.findOne({ email });
+      console.log(isUsed)
+
+      if (isUsed) return res.json(`${email} is already an Admin`);
+
+      const newAdmin = new Admin({
+        name,
+        email,
+        password,
+      });
+
+    //   const salt = await bcrypt.genSalt(10);
+    //   const hash = await bcrypt.hash(password, salt)
+    //   newAdmin.password = hash
+
+      await newAdmin.save();
+
+      console.log(newAdmin.password);
+      res.json(newAdmin);
+    } catch (err) {
+      res.json(err);
     }
-
-    const { name, email, password } = req.body;
-
-    const newAdmin = new Admin({
-      name,
-      email,
-      password,
-    });
-
-    // bcrypt.genSalt(10, (err, salt) => {
-    //     bcrypt.hash(password, salt, function(err, hash) {
-    //         // Store hash in your password DB.
-    //     });
-    // });
-
-    // const salt = await bcrypt.genSalt(10);
-    // const hash = await bcrypt.hash(password, salt);
-    // newAdmin.password = hash
-
-    await newAdmin.save();
-
-    res.json(newAdmin)
   };
 
   const admin = (req, res) => {
