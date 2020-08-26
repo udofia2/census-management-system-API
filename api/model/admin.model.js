@@ -10,13 +10,16 @@ const newAdmin = new Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
     required: true,
   },
+  citizen: {
+    type: Schema.Types.ObjectId,
+    ref: "citizens",
+  },
 });
-
 
 module.exports = mongoose.model("admins", newAdmin);

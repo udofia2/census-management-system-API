@@ -1,4 +1,11 @@
-const adminActions = (validationResult, Admin, bcrypt) => {
+const adminActions = (
+  validationResult,
+  Admin,
+  bcrypt,
+  jwt,
+  jwtSecret,
+  Citizens
+) => {
   /**
    * @param       GET /api/v1/admin
    * @desc        Fectches list of Admins
@@ -15,8 +22,33 @@ const adminActions = (validationResult, Admin, bcrypt) => {
    * @desc        An admin login route
    * @access      Everyone can access
    */
-  const login = (req, res) => {
-    res.json("Admin login here");
+  const login = async (req, res) => {
+    try {
+      //form validation error
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { email, password } = req.body;
+
+      const user = await Admin.findOne({ email });
+
+      if (!user) return res.json("invalid Credentials");
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) return res.json("invalid Credentials");
+
+      const payload = {
+        user: user._id,
+      };
+      const token = await jwt.sign(payload, jwtSecret, { expiresIn: "1h" });
+
+      res.json({ token });
+    } catch (err) {
+      res.json(err);
+    }
   };
 
   /**
@@ -39,11 +71,14 @@ const adminActions = (validationResult, Admin, bcrypt) => {
 
       if (isUsed) return res.json(`${email} is already an Admin`);
 
+      const citizen = await Citizens.find({});
+
       //creates new admin
       const newAdmin = new Admin({
         name,
         email,
         password,
+        citizens: citizen,
       });
 
       //Encrypt admin password
@@ -64,8 +99,21 @@ const adminActions = (validationResult, Admin, bcrypt) => {
    * @desc        Fectches single Admin
    * @access      protected( only signed in admin can access)
    */
-  const admin = (req, res) => {
-    res.json("Single admin");
+  const admin = async (req, res) => {
+    const id = req.params.adminID;
+    const profile = await Admin.findById(id);
+    const citizens = await Citizens.find({}).select("-createdAt -__v -_id");
+
+    res.json({
+      details: {
+        adminDetails: {
+          profile,
+        },
+        citizensDetails: {
+          citizens,
+        },
+      },
+    });
   };
 
   return {
