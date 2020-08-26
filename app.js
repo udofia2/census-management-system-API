@@ -9,5 +9,6 @@ app.use(express.urlencoded({extended: true}))
 
 
 app.use('/api/v1/citizen', require('./api/routes/citizen.route'))
+app.use('/api/v1/admin', require('./api/routes/admin.route'))
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
