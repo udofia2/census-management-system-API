@@ -13,8 +13,27 @@ const adminActions = (
    */
   const admins = async (req, res) => {
     //Feteches all the admins from the database
-    const admins = await Admin.find({});
-    res.json(admins);
+    try {
+      const admins = await Admin.find({});
+      res.json({
+        "total admin": admins.length,
+        admins: admins.map(admin => {
+          return {
+            // admin,
+            name: admin.name,
+            request: {
+              type: 'GET',
+              url: 'localhost:3000/api/v1/admin'
+            }
+
+          }
+        })
+      });
+      
+    } catch (err) {
+      res.status(500).json(err)
+      
+    }
   };
 
   /**

@@ -1,21 +1,50 @@
 const citizenActions = (Citizens, crypto, jwt, jwtScrete) => {
+  /**
+   * @param       GET /api/v1/profile
+   * @desc        Fectches all citizens
+   * @access      public( Every one can access)
+   */
   const citizens = async (req, res) => {
     try {
       const citizens = await Citizens.find({})
         .select("-__v -createdAt")
         .sort("desc");
 
-      res.json(citizens);
+      res.json({
+        Total: citizens.length,
+        Citizens: citizens.map((citizen) => {
+          return {
+            Name: `${citizen.fName} ${citizen.lName}`,
+            email: citizen.email,
+            citizenId: citizen.citizenID,
+            gender: citizen.gender,
+            request: {
+              type: "GET",
+              url: `http://localhost:3000/api/v1/citizen/profile/${citizen._id}`,
+            },
+          };
+        }),
+      });
     } catch (err) {
       console.error(err);
     }
   };
 
-  const citizen = (req, res) => {
-    res.json("individual citizen");
+  /**
+   * @param       GET /api/v1/profile/:citizenID
+   * @desc        Displays single citizen's profile
+   * @access      protected( only signed citizens can access)
+   */
+  const citizen = async (req, res) => {
+    const citizen = await Citizens.findById(req.params.citizenID);
+    res.json(citizen);
   };
 
-
+  /**
+   * @param       POST /api/v1/citizen/rgister
+   * @desc        Citizen registration route
+   * @access      public( Every one can access)
+   */
   const register = async (req, res) => {
     const {
       email,
@@ -53,12 +82,17 @@ const citizenActions = (Citizens, crypto, jwt, jwtScrete) => {
 
       await newCitizen.save();
 
-      res.json({ newCitizen, token });
+      res.status(201).json({ name: `${newCitizen.fName} ${newCitizen.lName}` });
     } catch (err) {
       console.error(err);
     }
   };
 
+  /**
+   * @param       POST /api/v1/citizen/login
+   * @desc        signs in a citizen
+   * @access      public( Every one can access)
+   */
   const login = async (req, res) => {
     const { email, citizenID } = req.body;
     if (!(email || citizenID))
@@ -67,7 +101,7 @@ const citizenActions = (Citizens, crypto, jwt, jwtScrete) => {
     const user = await Citizens.find({ email });
 
     const payload = {
-      user: user._id
+      user: user._id,
     };
 
     const token = await jwt.sign(payload, jwtScrete, { expiresIn: "1h" });
@@ -77,6 +111,11 @@ const citizenActions = (Citizens, crypto, jwt, jwtScrete) => {
     res.json({ token });
   };
 
+  /**
+   * @param       GET /api/v1/citizen/logout
+   * @desc        Logs out a citizen
+   * @access      protected( only logged in users can access)
+   */
   const logout = (req, res) => {
     //   console.log(req.logout())
     res.json("You are now logged out");

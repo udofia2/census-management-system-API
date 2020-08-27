@@ -9,7 +9,7 @@ const { citizen, citizens, login, logout, register} = require('./../controller/c
 const citizenRouter = Router()
 
 citizenRouter.route('/').get(citizens)
-citizenRouter.route('/profile/:citizen').get(loginAuth, citizen)
+citizenRouter.route('/profile/:citizenID').get(loginAuth, citizen)
 citizenRouter.route('/register').post(register)
 citizenRouter.route('/login').post(login)
 citizenRouter.route('/logout').get(logout)

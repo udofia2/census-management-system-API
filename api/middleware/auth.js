@@ -1,25 +1,23 @@
 const permission = (jwt, jwtScrete) => {
-    const loginAuth = async (req, res, next) => {
+  const loginAuth = async (req, res, next) => {
+    try {
+      const token = req.header("x-auth-header");
 
-        try {
-            const token = req.header('x-auth-header')
+      if (!token) return res.json("please login");
 
-            if(!token) return res.json('please login')
-            
-           const decode = await jwt.verify(token, jwtScrete)
-            console.log(decode)
-            next()
-        } catch (err) {
-            if(err) {
-                console.log(err)
-                res.json('Please sign in')
-            }
-        }
+      const decode = await jwt.verify(token, jwtScrete);
+      next();
+    } catch (err) {
+      if (err) {
+        console.log(err);
+        res.json("Please sign in");
+      }
     }
+  };
 
-    return {
-        loginAuth
-    }
-}
+  return {
+    loginAuth,
+  };
+};
 
-module.exports = permission
+module.exports = permission;
